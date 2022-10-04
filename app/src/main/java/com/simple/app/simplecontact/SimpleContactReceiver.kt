@@ -17,12 +17,13 @@ import kotlinx.coroutines.launch
 
 // EXAMPLES:
 // adb shell
-// am broadcast -a com.simple.app.simplecontact.add --es name 'test4' --ei phone 12313 -n com.simple.app.simplecontact/.SimpleContactReceiver
-// am broadcast -a com.simple.app.simplecontact.read_by_name --es name 'test4' -n com.simple.app.simplecontact/.SimpleContactReceiver
-// am broadcast -a com.simple.app.simplecontact.read_by_phone --ei phone 12313 -n com.simple.app.simplecontact/.SimpleContactReceiver
+// am broadcast -a com.simple.app.simplecontact.add --es name 'test4' --es phone '12313' -n com.simple.app.simplecontact/.SimpleContactReceiver
 
-// am broadcast -a com.simple.app.simplecontact.modify_by_phone --ei phone 23 --es new_name 'test42424424' --ei new_phone 1111111 -n com.simple.app.simplecontact/.SimpleContactReceiver
-// am broadcast -a com.simple.app.simplecontact.modify_by_phone --ei phone 1111111  --ei new_phone 501 -n com.simple.app.simplecontact/.SimpleContactReceiver
+// am broadcast -a com.simple.app.simplecontact.read_by_name --es name 'test1' -n com.simple.app.simplecontact/.SimpleContactReceiver
+// am broadcast -a com.simple.app.simplecontact.read_by_phone --es phone '111111111111' -n com.simple.app.simplecontact/.SimpleContactReceiver
+
+// am broadcast -a com.simple.app.simplecontact.modify_by_phone --es phone '111111111111' --es new_name 'test2' --es new_phone '2222222222' -n com.simple.app.simplecontact/.SimpleContactReceiver
+// am broadcast -a com.simple.app.simplecontact.modify_by_phone --es phone '2323'  --es new_phone '5050' -n com.simple.app.simplecontact/.SimpleContactReceiver
 
 class SimpleContactReceiver : BroadcastReceiver() {
 
@@ -370,9 +371,9 @@ class SimpleContactReceiver : BroadcastReceiver() {
         return if (phoneArg != -1L) phoneArg else null
     }
 
-    private fun findNewPhoneArg(intent: Intent): Int? {
-        val phoneArg = intent.getIntExtra(NEW_PHONE, -1)
-        return if (phoneArg != -1) phoneArg else null
+    private fun findNewPhoneArg(intent: Intent): Long? {
+        val phoneArg = intent.getStringExtra(NEW_PHONE)?.toLongOrNull() ?: -1L
+        return if (phoneArg != -1L) phoneArg else null
     }
 
     companion object {
