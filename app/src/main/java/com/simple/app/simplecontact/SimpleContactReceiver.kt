@@ -100,7 +100,7 @@ class SimpleContactReceiver : BroadcastReceiver() {
 
     // use if need. But i was try added duplicate items, phone ignored it. Maybe it will be work so different on other android version.
     // maybe take some times if user have to much phones.
-    private fun isExistContact(context: Context, searchPhone: Int): Boolean {
+    private fun isExistContact(context: Context, searchPhone: Long): Boolean {
         val result = kotlin.runCatching {
             val contentResolver = context.contentResolver
             val cursor =
@@ -365,9 +365,9 @@ class SimpleContactReceiver : BroadcastReceiver() {
         return intent.getStringExtra(NEW_NAME)
     }
 
-    private fun findPhoneArg(intent: Intent): Int? {
-        val phoneArg = intent.getIntExtra(ARG_PHONE, -1)
-        return if (phoneArg != -1) phoneArg else null
+    private fun findPhoneArg(intent: Intent): Long? {
+        val phoneArg = intent.getStringExtra(ARG_PHONE)?.toLongOrNull() ?: -1L
+        return if (phoneArg != -1L) phoneArg else null
     }
 
     private fun findNewPhoneArg(intent: Intent): Int? {
