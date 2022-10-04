@@ -19,11 +19,11 @@ import kotlinx.coroutines.launch
 // adb shell
 // am broadcast -a com.simple.app.simplecontact.add --es name 'test4' --es phone '12313' -n com.simple.app.simplecontact/.SimpleContactReceiver
 
-// am broadcast -a com.simple.app.simplecontact.read_by_name --es name 'test1' -n com.simple.app.simplecontact/.SimpleContactReceiver
-// am broadcast -a com.simple.app.simplecontact.read_by_phone --es phone '111111111111' -n com.simple.app.simplecontact/.SimpleContactReceiver
+// am broadcast -a com.simple.app.simplecontact.read_by_name --es name 'test11' -n com.simple.app.simplecontact/.SimpleContactReceiver
+// am broadcast -a com.simple.app.simplecontact.read_by_phone --es phone '+38(096)2994559' -n com.simple.app.simplecontact/.SimpleContactReceiver
 
-// am broadcast -a com.simple.app.simplecontact.modify_by_phone --es phone '111111111111' --es new_name 'test2' --es new_phone '2222222222' -n com.simple.app.simplecontact/.SimpleContactReceiver
-// am broadcast -a com.simple.app.simplecontact.modify_by_phone --es phone '2323'  --es new_phone '5050' -n com.simple.app.simplecontact/.SimpleContactReceiver
+// am broadcast -a com.simple.app.simplecontact.modify_by_phone --es phone '+38(096)2994559' --es new_name 'test100' --es new_phone '+38(098)2994559' -n com.simple.app.simplecontact/.SimpleContactReceiver
+// am broadcast -a com.simple.app.simplecontact.modify_by_phone --es phone '+38(098)2994559'  --es new_phone '+18(092)2994559' -n com.simple.app.simplecontact/.SimpleContactReceiver
 
 class SimpleContactReceiver : BroadcastReceiver() {
 
@@ -101,7 +101,7 @@ class SimpleContactReceiver : BroadcastReceiver() {
 
     // use if need. But i was try added duplicate items, phone ignored it. Maybe it will be work so different on other android version.
     // maybe take some times if user have to much phones.
-    private fun isExistContact(context: Context, searchPhone: Long): Boolean {
+    private fun isExistContact(context: Context, searchPhone: String): Boolean {
         val result = kotlin.runCatching {
             val contentResolver = context.contentResolver
             val cursor =
@@ -132,7 +132,8 @@ class SimpleContactReceiver : BroadcastReceiver() {
                                         .getString(currentPhoneNumberIndex)
 
                                     currentPhone = cleanPhoneNumber(currentPhone)
-                                    if (currentPhone.contains(searchPhone.toString(), true)) {
+                                    val forSearch = cleanPhoneNumber(searchPhone)
+                                    if (currentPhone.contains(forSearch, true)) {
                                         allPhonesCursor.close()
                                         return@runCatching true
                                     }
@@ -157,6 +158,7 @@ class SimpleContactReceiver : BroadcastReceiver() {
     }
 
     private fun cleanPhoneNumber(currentPhone: String) = currentPhone
+        .replace("+", "")
         .replace(" ", "")
         .replace("(", "")
         .replace(")", "")
@@ -366,14 +368,12 @@ class SimpleContactReceiver : BroadcastReceiver() {
         return intent.getStringExtra(NEW_NAME)
     }
 
-    private fun findPhoneArg(intent: Intent): Long? {
-        val phoneArg = intent.getStringExtra(ARG_PHONE)?.toLongOrNull() ?: -1L
-        return if (phoneArg != -1L) phoneArg else null
+    private fun findPhoneArg(intent: Intent): String? {
+        return intent.getStringExtra(ARG_PHONE)
     }
 
-    private fun findNewPhoneArg(intent: Intent): Long? {
-        val phoneArg = intent.getStringExtra(NEW_PHONE)?.toLongOrNull() ?: -1L
-        return if (phoneArg != -1L) phoneArg else null
+    private fun findNewPhoneArg(intent: Intent): String? {
+        return intent.getStringExtra(NEW_PHONE)
     }
 
     companion object {
