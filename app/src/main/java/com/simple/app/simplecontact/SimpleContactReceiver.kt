@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 // am broadcast -a com.simple.app.simplecontact.read_by_name --es name 'test11' -n com.simple.app.simplecontact/.SimpleContactReceiver
 // am broadcast -a com.simple.app.simplecontact.read_by_phone --es phone '+38(096)2994559' -n com.simple.app.simplecontact/.SimpleContactReceiver
 
-// am broadcast -a com.simple.app.simplecontact.modify_by_phone --es phone '+38(096)2994559' --es new_name 'test100' --es new_phone '+38(098)2994559' -n com.simple.app.simplecontact/.SimpleContactReceiver
+// am broadcast -a com.simple.app.simplecontact.modify_by_phone --es phone '+380993334535' --es new_name 'test102' --es new_phone '+38(098)2994559' -n com.simple.app.simplecontact/.SimpleContactReceiver
 // am broadcast -a com.simple.app.simplecontact.modify_by_phone --es phone '+38(098)2994559'  --es new_phone '+18(092)2994559' -n com.simple.app.simplecontact/.SimpleContactReceiver
 
 class SimpleContactReceiver : BroadcastReceiver() {
@@ -70,7 +70,10 @@ class SimpleContactReceiver : BroadcastReceiver() {
                     .newInsert(Data.CONTENT_URI)
                     .withValueBackReference(Data.RAW_CONTACT_ID, 0)
                     .withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
-                    .withValue(Phone.NUMBER, phone).build()
+                    .withValue(Phone.NUMBER, phone)
+                    .withValue(Phone.TYPE, Phone.TYPE_MOBILE)
+                    .build()
+
                 contactsOp.add(phoneOp)
                 val nameOp = ContentProviderOperation
                     .newInsert(Data.CONTENT_URI)
@@ -326,12 +329,13 @@ class SimpleContactReceiver : BroadcastReceiver() {
                 Data.DATA1/*number*/
             )
 
-            args[0] = searchPhone?.toString() ?: ""
+            args[0] = searchPhone ?: ""
 
             operations.add(
                 ContentProviderOperation.newUpdate(Data.CONTENT_URI)
                     .withSelection(where, args)
-                    .withValue(Data.DATA1 /*number*/, newPhone.toString())
+                    .withValue(Data.DATA1 /*number*/, newPhone)
+                    .withValue(Phone.TYPE, Phone.TYPE_MOBILE)
                     .build()
             )
             context.contentResolver.applyBatch(ContactsContract.AUTHORITY, operations)
