@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 // EXAMPLES:
 // adb shell
 // am broadcast -a com.simple.app.simplecontact.add --es name 'test4' --es phone '12313' -n com.simple.app.simplecontact/.SimpleContactReceiver
+//OPTIONAL WITH TYPE(mobile/custom) (mobile type as default): am broadcast -a com.simple.app.simplecontact.add --es name 'test44440' --es phone '+3803494455' --es phone_type 'mobile' -n com.simple.app.simplecontact/.SimpleContactReceiver
 
 // am broadcast -a com.simple.app.simplecontact.read_by_name --es name 'test11' -n com.simple.app.simplecontact/.SimpleContactReceiver
 // am broadcast -a com.simple.app.simplecontact.read_by_phone --es phone '+38(096)2994559' -n com.simple.app.simplecontact/.SimpleContactReceiver
@@ -52,6 +53,7 @@ class SimpleContactReceiver : BroadcastReceiver() {
     private fun addContact(context: Context, intent: Intent) {
         val name = findNameArg(intent)
         val phone = findPhoneArg(intent)
+        val phoneType = findInsertPhoneType(intent)
         if (name != null && phone != null) {
             // Uncomment it if u need this check.
             scope.launch(Dispatchers.IO) {
@@ -71,7 +73,7 @@ class SimpleContactReceiver : BroadcastReceiver() {
                     .withValueBackReference(Data.RAW_CONTACT_ID, 0)
                     .withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
                     .withValue(Phone.NUMBER, phone)
-                    .withValue(Phone.TYPE, Phone.TYPE_MOBILE)
+                    .withValue(Phone.TYPE, PhoneType.typeToSave(phoneType))
                     .build()
 
                 contactsOp.add(phoneOp)
@@ -380,6 +382,32 @@ class SimpleContactReceiver : BroadcastReceiver() {
         return intent.getStringExtra(NEW_PHONE)
     }
 
+    private fun findInsertPhoneType(intent: Intent): PhoneType {
+        val incomeType = intent.getStringExtra(PHONE_TYPE) ?: PhoneType.MOBILE.type
+        return PhoneType.parseIncomeType(incomeType)
+    }
+
+    private enum class PhoneType(val type: String) {
+        CUSTOM("custom"), MOBILE("mobile");
+
+        companion object {
+            fun typeToSave(phoneType: PhoneType): Int {
+                return when (phoneType) {
+                    CUSTOM -> Phone.TYPE_CUSTOM
+                    MOBILE -> Phone.TYPE_MOBILE
+                }
+            }
+
+            fun parseIncomeType(type: String): PhoneType {
+                return when (type) {
+                    CUSTOM.type -> CUSTOM
+                    MOBILE.type -> MOBILE
+                    else -> MOBILE
+                }
+            }
+        }
+    }
+
     companion object {
         private const val TAG = "SimpleContactTag"
 
@@ -395,5 +423,7 @@ class SimpleContactReceiver : BroadcastReceiver() {
 
         private const val NEW_NAME = "new_name"
         private const val NEW_PHONE = "new_phone"
+
+        private const val PHONE_TYPE = "phone_type"
     }
 }
